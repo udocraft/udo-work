@@ -384,16 +384,20 @@ export async function handleTaskDetail(ctx: HandlerContext, taskId: string): Pro
             // Legacy format: content is just the signed URL (may be expired)
             // Try to extract storage path from signed URL and regenerate
             try {
+              logger.info('Legacy attachment content:', a.content);
               const url = new URL(a.content);
               const pathParts = url.pathname.split('/');
+              logger.info('URL path parts:', pathParts);
               // Supabase signed URL format: /storage/v1/object/sign/{bucket}/{path}?token=...
               const objectIdx = pathParts.indexOf('object');
               if (objectIdx !== -1 && objectIdx + 2 < pathParts.length) {
                 const storagePath = pathParts.slice(objectIdx + 2).join('/');
+                logger.info('Extracted storage path:', storagePath);
                 const freshUrl = await storageService.regenerateSignedUrl(storagePath);
                 lines.push(`  📄 [Файл](${freshUrl})`);
               } else {
                 // Can't parse path, show as unavailable
+                logger.info('Could not parse storage path from URL');
                 lines.push(`  📄 Файл _(недоступний)_`);
               }
             } catch (err) {
