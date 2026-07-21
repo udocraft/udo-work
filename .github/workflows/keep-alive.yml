@@ -21,7 +21,7 @@ jobs:
       - name: Ping Supabase
         run: |
           echo "Pinging Supabase..."
-          curl -X GET "${SUPABASE_URL}" \
+          curl -I "${SUPABASE_URL}" \
             -H "User-Agent: GitHub-Action-Keep-Alive" \
             --fail-with-body
         env:
