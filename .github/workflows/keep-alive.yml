@@ -22,7 +22,6 @@ jobs:
         run: |
           echo "Pinging Supabase..."
           curl -I "${SUPABASE_URL}" \
-            -H "User-Agent: GitHub-Action-Keep-Alive" \
-            --fail-with-body
+            -H "User-Agent: GitHub-Action-Keep-Alive"
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
