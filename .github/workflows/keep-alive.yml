@@ -14,8 +14,13 @@ jobs:
     steps:
       - name: Ping Supabase API
         run: |
+          echo "Pinging Supabase..."
           curl -X GET "${{ secrets.SUPABASE_URL }}" \
             -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
             -H "Content-Type: application/json" \
+            -v \
             --fail-with-body
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
