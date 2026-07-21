@@ -15,9 +15,10 @@ jobs:
       - name: Ping Supabase API
         run: |
           echo "Pinging Supabase..."
-          curl -X GET "${{ secrets.SUPABASE_URL }}" \
-            -H "apikey: ${{ secrets.SUPABASE_ANON_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_ANON_KEY }}" \
+          echo "URL: ${SUPABASE_URL}/rest/v1/"
+          curl -X GET "${SUPABASE_URL}/rest/v1/" \
+            -H "apikey: ${SUPABASE_ANON_KEY}" \
+            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
             -H "Content-Type: application/json" \
             -v \
             --fail-with-body
