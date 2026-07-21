@@ -12,6 +12,16 @@ jobs:
   ping-supabase:
     runs-on: ubuntu-latest
     steps:
+      - name: Validate secrets
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "Error: SUPABASE_URL secret is not set"
+            exit 1
+          fi
+          if [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
+            echo "Error: SUPABASE_ANON_KEY secret is not set"
+            exit 1
+          fi
       - name: Ping Supabase API
         run: |
           echo "Pinging Supabase..."
