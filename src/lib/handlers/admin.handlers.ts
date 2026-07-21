@@ -381,8 +381,25 @@ export async function handleTaskDetail(ctx: HandlerContext, taskId: string): Pro
               lines.push(`  📄 ${esc(fileName)} _(недоступний)_`);
             }
           } else {
-            // Legacy format: content is just the URL (may be expired)
-            lines.push(`  📄 [Файл](${a.content})`);
+            // Legacy format: content is just the signed URL (may be expired)
+            // Try to extract storage path from signed URL and regenerate
+            try {
+              const url = new URL(a.content);
+              const pathParts = url.pathname.split('/');
+              // Supabase signed URL format: /storage/v1/object/sign/{bucket}/{path}?token=...
+              const objectIdx = pathParts.indexOf('object');
+              if (objectIdx !== -1 && objectIdx + 2 < pathParts.length) {
+                const storagePath = pathParts.slice(objectIdx + 2).join('/');
+                const freshUrl = await storageService.regenerateSignedUrl(storagePath);
+                lines.push(`  📄 [Файл](${freshUrl})`);
+              } else {
+                // Can't parse path, show as unavailable
+                lines.push(`  📄 Файл _(недоступний)_`);
+              }
+            } catch (err) {
+              logger.error('Failed to parse legacy signed URL', err);
+              lines.push(`  📄 Файл _(недоступний)_`);
+            }
           }
         }
       }
