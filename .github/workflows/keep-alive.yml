@@ -18,20 +18,11 @@ jobs:
             echo "Error: SUPABASE_URL secret is not set"
             exit 1
           fi
-          if [ -z "${{ secrets.SUPABASE_ANON_KEY }}" ]; then
-            echo "Error: SUPABASE_ANON_KEY secret is not set"
-            exit 1
-          fi
-      - name: Ping Supabase API
+      - name: Ping Supabase
         run: |
           echo "Pinging Supabase..."
-          echo "URL: ${SUPABASE_URL}/rest/v1/"
-          curl -X GET "${SUPABASE_URL}/rest/v1/" \
-            -H "apikey: ${SUPABASE_ANON_KEY}" \
-            -H "Authorization: Bearer ${SUPABASE_ANON_KEY}" \
-            -H "Content-Type: application/json" \
-            -v \
+          curl -X GET "${SUPABASE_URL}" \
+            -H "User-Agent: GitHub-Action-Keep-Alive" \
             --fail-with-body
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
