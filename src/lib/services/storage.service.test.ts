@@ -113,27 +113,28 @@ describe('StorageService — Property 7: Attachment Storage Round Trip', () => {
 
   // -------------------------------------------------------------------------
   // Property 7b: File attachment round trip
-  // For any file URL saved via saveFileAttachment, the returned Attachment
-  // contains the exact same URL and type = 'file'.
+  // For any file storage path saved via saveFileAttachment, the returned Attachment
+  // contains the exact storage path encoded as "filename\nstoragePath" and type = 'file'.
   // -------------------------------------------------------------------------
   it(
-    'Property 7b: saveFileAttachment returns attachment with exact URL and type=file',
+    'Property 7b: saveFileAttachment returns attachment with storage path encoded as filename\\npath and type=file',
     async () => {
       // Feature: telegram-time-tracker, Property 7: Attachment storage round trip
       await fc.assert(
         fc.asyncProperty(
           fc.uuid(),
-          fc.webUrl(),
-          fc.string({ minLength: 1, maxLength: 100 }),
-          async (taskId, url, fileName) => {
-            const row = buildAttachmentRow(taskId, 'file', url);
+          fc.string({ minLength: 1, maxLength: 100 }), // storage path
+          fc.string({ minLength: 1, maxLength: 100 }), // filename
+          async (taskId, storagePath, fileName) => {
+            const content = `${fileName}\n${storagePath}`;
+            const row = buildAttachmentRow(taskId, 'file', content);
             setupInsertMock(row);
 
-            const attachment = await storageService.saveFileAttachment(taskId, url, fileName);
+            const attachment = await storageService.saveFileAttachment(taskId, storagePath, fileName);
 
             expect(attachment.task_id).toBe(taskId);
             expect(attachment.type).toBe('file');
-            expect(attachment.content).toBe(url);
+            expect(attachment.content).toBe(content);
           }
         ),
         { numRuns: 100 }
@@ -221,7 +222,7 @@ describe('StorageService — Property 7: Attachment Storage Round Trip', () => {
     setupInsertErrorMock();
 
     await expect(
-      storageService.saveFileAttachment('task-id', 'https://example.com/file.pdf', 'file.pdf')
+      storageService.saveFileAttachment('task-id', 'user-id/task-id/123-file.pdf', 'file.pdf')
     ).rejects.toThrow(DatabaseError);
   });
 });

@@ -52,10 +52,13 @@ export interface StorageService {
   saveTextAttachment(taskId: string, text: string): Promise<Attachment>;
 
   /** Inserts an attachments row with type = 'file'. */
-  saveFileAttachment(taskId: string, url: string, fileName: string): Promise<Attachment>;
+  saveFileAttachment(taskId: string, storagePath: string, fileName: string): Promise<Attachment>;
 
   /** Returns all attachments for a given task_id. */
   getAttachments(taskId: string): Promise<Attachment[]>;
+
+  /** Regenerates a signed URL for a file attachment using its storage path. */
+  regenerateSignedUrl(storagePath: string): Promise<string>;
 }
 
 // ---------------------------------------------------------------------------
@@ -190,13 +193,13 @@ export const storageService: StorageService = {
 
   /**
    * Inserts an attachments row with type = 'file'.
-   * Content is stored as "filename\nurl" so the filename can be recovered
-   * without a schema change. The URL is the signed Supabase Storage URL.
+   * Content is stored as "filename\nstoragePath" so the filename can be recovered
+   * without a schema change. The storagePath is used to regenerate signed URLs on demand.
    * Requirement 7.2
    */
-  async saveFileAttachment(taskId: string, url: string, fileName: string): Promise<Attachment> {
-    // Encode as "filename\nurl" — newline is safe since filenames never contain \n
-    const content = `${fileName}\n${url}`;
+  async saveFileAttachment(taskId: string, storagePath: string, fileName: string): Promise<Attachment> {
+    // Encode as "filename\nstoragePath" — newline is safe since filenames never contain \n
+    const content = `${fileName}\n${storagePath}`;
     const { data, error } = await supabase
       .from('attachments')
       .insert({
@@ -232,5 +235,23 @@ export const storageService: StorageService = {
     }
 
     return (data ?? []).map((row) => mapAttachmentRow(row as AttachmentRow));
+  },
+
+  /**
+   * Regenerates a signed URL for a file attachment using its storage path.
+   * The signed URL is valid for 7 days (604800 seconds).
+   */
+  async regenerateSignedUrl(storagePath: string): Promise<string> {
+    const bucket = getBucketName();
+    const { data: signedUrlData, error: signedUrlError } = await supabase.storage
+      .from(bucket)
+      .createSignedUrl(storagePath, 604800);
+
+    if (signedUrlError || !signedUrlData?.signedUrl) {
+      logger.error('StorageService.regenerateSignedUrl: failed to create signed URL', signedUrlError);
+      throw new StorageError('Failed to regenerate signed URL');
+    }
+
+    return signedUrlData.signedUrl;
   },
 };

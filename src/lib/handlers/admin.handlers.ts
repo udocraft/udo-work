@@ -368,14 +368,20 @@ export async function handleTaskDetail(ctx: HandlerContext, taskId: string): Pro
         if (a.type === 'text') {
           lines.push(`  💬 ${esc(a.content)}`);
         } else {
-          // Content is stored as "filename\nurl"
+          // Content is stored as "filename\nstoragePath"
           const newlineIdx = a.content.indexOf('\n');
           if (newlineIdx !== -1) {
             const fileName = a.content.slice(0, newlineIdx);
-            const fileUrl = a.content.slice(newlineIdx + 1);
-            lines.push(`  📄 [${esc(fileName)}](${fileUrl})`);
+            const storagePath = a.content.slice(newlineIdx + 1);
+            try {
+              const fileUrl = await storageService.regenerateSignedUrl(storagePath);
+              lines.push(`  📄 [${esc(fileName)}](${fileUrl})`);
+            } catch (err) {
+              logger.error('Failed to regenerate signed URL for attachment', err);
+              lines.push(`  📄 ${esc(fileName)} _(недоступний)_`);
+            }
           } else {
-            // Legacy format: content is just the URL
+            // Legacy format: content is just the URL (may be expired)
             lines.push(`  📄 [Файл](${a.content})`);
           }
         }

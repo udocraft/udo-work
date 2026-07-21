@@ -747,12 +747,22 @@ export default function AppPage() {
                                 onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                             </a>
                           ) : (
-                            <a key={fi} href={url} target="_blank" rel="noopener noreferrer"
-                              className="flex items-center gap-2 px-3 py-2 bg-slate-700 rounded-lg text-xs text-slate-300 hover:text-white transition-colors">
+                            <button
+                              key={fi}
+                              type="button"
+                              onClick={() => {
+                                const tg = (window as any).Telegram?.WebApp;
+                                if (tg?.openLink) {
+                                  tg.openLink(url);
+                                } else {
+                                  window.open(url, '_blank', 'noopener,noreferrer');
+                                }
+                              }}
+                              className="w-full flex items-center gap-2 px-3 py-2 bg-slate-700 rounded-lg text-xs text-slate-300 hover:text-white transition-colors text-left">
                               <span>📄</span>
                               <span className="truncate flex-1">{display}</span>
                               <span className="text-slate-500 flex-shrink-0">↗</span>
-                            </a>
+                            </button>
                           );
                         })}
                       </div>

@@ -70,17 +70,8 @@ export async function POST(request: Request): Promise<Response> {
       return Response.json({ error: 'Upload failed' }, { status: 500 });
     }
 
-    // Signed URL valid for 7 days
-    const { data: signedData, error: signedError } = await supabase.storage
-      .from(bucket)
-      .createSignedUrl(storagePath, 7 * 24 * 3600);
-
-    if (signedError || !signedData?.signedUrl) {
-      logger.error('Upload API: signed URL failed', signedError);
-      return Response.json({ error: 'Could not generate URL' }, { status: 500 });
-    }
-
-    const attachment = await storageService.saveFileAttachment(taskId, signedData.signedUrl, fileName);
+    // Save storage path instead of signed URL (will regenerate on demand)
+    const attachment = await storageService.saveFileAttachment(taskId, storagePath, fileName);
 
     return Response.json({ ok: true, attachment });
   } catch (err) {

@@ -257,6 +257,15 @@ export async function route(
         await telegramClient.sendMessage(chatId, MESSAGES.NO_PERMISSION);
         return;
       }
+      // If the user sends a file/photo directly (skipping the comment step),
+      // treat it as an implicit /skip of the comment and go straight to deliverable.
+      if (message.document || (message.photo && message.photo.length > 0)) {
+        await employeeHandlers.handleTaskCommentInput(ctx, '/skip');
+        // Re-fetch session so the state is now awaiting_deliverable
+        const updatedSession = await sessionService.getSession(user.id);
+        await employeeHandlers.handleDeliverableInput({ ...ctx, session: updatedSession }, message);
+        return;
+      }
       // /skip in comment state → go straight to file prompt
       await employeeHandlers.handleTaskCommentInput(ctx, text);
       return;

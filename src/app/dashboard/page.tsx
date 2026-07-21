@@ -1415,12 +1415,18 @@ function TaskCard({ task: t, displayMinutes, users }: { task: TaskStat; displayM
             {docFiles.length > 0 && (
               <div className="space-y-1.5">
                 {docFiles.map((f, i) => (
-                  <a
+                  <button
                     key={i}
-                    href={f.url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="flex items-center gap-3 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors group"
+                    type="button"
+                    onClick={() => {
+                      const tg = (window as any).Telegram?.WebApp;
+                      if (tg?.openLink) {
+                        tg.openLink(f.url);
+                      } else {
+                        window.open(f.url, '_blank', 'noopener,noreferrer');
+                      }
+                    }}
+                    className="w-full flex items-center gap-3 px-3 py-2.5 bg-gray-50 hover:bg-gray-100 rounded-xl transition-colors group text-left"
                   >
                     <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center flex-shrink-0">
                       <Ic name="task" size={16} className="text-blue-600" />
@@ -1430,7 +1436,7 @@ function TaskCard({ task: t, displayMinutes, users }: { task: TaskStat; displayM
                       <p className="text-xs text-gray-400">Натисніть щоб відкрити</p>
                     </div>
                     <Ic name="back" size={14} className="text-gray-400 group-hover:text-blue-500 rotate-[-90deg] transition-colors flex-shrink-0" />
-                  </a>
+                  </button>
                 ))}
               </div>
             )}
