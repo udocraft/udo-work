@@ -243,6 +243,7 @@ export const storageService: StorageService = {
    */
   async regenerateSignedUrl(storagePath: string): Promise<string> {
     const bucket = getBucketName();
+    logger.info('StorageService.regenerateSignedUrl: bucket:', bucket, 'storagePath:', storagePath);
     const { data: signedUrlData, error: signedUrlError } = await supabase.storage
       .from(bucket)
       .createSignedUrl(storagePath, 604800);
@@ -252,6 +253,7 @@ export const storageService: StorageService = {
       throw new StorageError('Failed to regenerate signed URL');
     }
 
+    logger.info('StorageService.regenerateSignedUrl: success, signedUrl length:', signedUrlData.signedUrl.length);
     return signedUrlData.signedUrl;
   },
 };
