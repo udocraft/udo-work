@@ -193,6 +193,7 @@ export function buildProjectKeyboard(
 export function buildEmployeeListKeyboard(
   employees: User[],
   backAction = 'action:employees',
+  callbackPrefix = 'employee',
 ): InlineKeyboardMarkup {
   return {
     inline_keyboard: [
@@ -200,7 +201,7 @@ export function buildEmployeeListKeyboard(
         const name = e.first_name ?? (e.username ? `@${e.username}` : `ID ${e.telegram_id}`);
         const rateLabel = e.hourly_rate ? ` · 💰${e.hourly_rate}₴` : '';
         return [
-          { text: `👤 ${name}${rateLabel}`, callback_data: `employee:${e.id}` },
+          { text: `👤 ${name}${rateLabel}`, callback_data: `${callbackPrefix}:${e.id}` },
           { text: '✏️', callback_data: `edit_employee:${e.id}` },
           { text: '💵', callback_data: `edit_rate:${e.id}` },
         ];

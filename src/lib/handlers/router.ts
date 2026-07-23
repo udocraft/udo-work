@@ -436,6 +436,19 @@ async function handleCallbackData(
   }
 
   // -------------------------------------------------------------------------
+  // filter_project:{id} prefix — admin only (for task filtering)
+  // -------------------------------------------------------------------------
+  if (data.startsWith('filter_project:')) {
+    if (user.role !== 'admin') {
+      await telegramClient.sendMessage(chatId, MESSAGES.NO_PERMISSION);
+      return;
+    }
+    const projectId = data.slice('filter_project:'.length);
+    await adminHandlers.handleProjectTasksFilter(ctx, projectId);
+    return;
+  }
+
+  // -------------------------------------------------------------------------
   // project:{id} prefix
   // -------------------------------------------------------------------------
   if (data.startsWith('project:')) {
@@ -493,7 +506,20 @@ async function handleCallbackData(
   }
 
   // -------------------------------------------------------------------------
-  // employee:{id} prefix — admin only
+  // filter_employee:{id} prefix — admin only (for task filtering)
+  // -------------------------------------------------------------------------
+  if (data.startsWith('filter_employee:')) {
+    if (user.role !== 'admin') {
+      await telegramClient.sendMessage(chatId, MESSAGES.NO_PERMISSION);
+      return;
+    }
+    const userId = data.slice('filter_employee:'.length);
+    await adminHandlers.handleEmployeeTasksFilter(ctx, userId);
+    return;
+  }
+
+  // -------------------------------------------------------------------------
+  // employee:{id} prefix — admin only (for employee details)
   // -------------------------------------------------------------------------
   if (data.startsWith('employee:')) {
     if (user.role !== 'admin') {

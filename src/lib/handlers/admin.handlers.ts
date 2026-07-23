@@ -308,7 +308,7 @@ export async function handleTasksFilter(ctx: HandlerContext, filter: string): Pr
         return;
       }
       await reply(chatId, messageId, '📁 Оберіть проєкт:', {
-        reply_markup: buildProjectKeyboard(projects, 'action:tasks_logs'),
+        reply_markup: buildProjectKeyboard(projects, 'action:tasks_logs', 'filter_project'),
       });
     } else if (filter === 'by_employee') {
       const employees = await userService.getAllEmployeesWithWeeklyTime();
@@ -317,7 +317,7 @@ export async function handleTasksFilter(ctx: HandlerContext, filter: string): Pr
         return;
       }
       await reply(chatId, messageId, '👤 Оберіть співробітника:', {
-        reply_markup: buildEmployeeListKeyboard(employees, 'action:tasks_logs'),
+        reply_markup: buildEmployeeListKeyboard(employees, 'action:tasks_logs', 'filter_employee'),
       });
     }
   } catch (err) {
